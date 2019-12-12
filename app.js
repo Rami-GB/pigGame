@@ -8,12 +8,51 @@ GAME RULES:
 - The first player to reach 100 points on GLOBAL score wins the game
 
 */
-var scores, roundScore, activePlayer, dice;
+var scores, roundScore, activePlayer;
 
 scores = [0, 0];
 roundScore = 0;
 activePlayer = 0;
 
-dice = Math.floor(Math.random() * 6) + 1;
+document.querySelector('.dice').style.display = 'none';
 
-document.querySelector(`#current-${activePlayer}`).textContent = dice;
+//init the game
+['current-0', 'current-1', 'score-0', 'score-1'].forEach(e => {
+    document.getElementById(e).textContent = 0;
+});
+
+//document.querySelector(`#current-${activePlayer}`).textContent = dice;
+
+document.querySelector('.btn-roll').addEventListener('click', function () {
+    var dice, diceDOM;
+    //1- get a random number
+    dice = Math.floor(Math.random() * 6) + 1;
+
+    //2- update the dice 
+    diceDOM = document.querySelector('.dice');
+    diceDOM.style.display = 'block';
+    diceDOM.src = `dice-${dice}.png`;
+
+    //3- update the score if rolled !== 1
+    if (dice !== 1) {
+        //add score
+        roundScore += dice;
+        //update the UI
+        document.querySelector(`#current-${activePlayer}`).textContent = roundScore;
+    } else {
+        //update UI
+        document.querySelector(`#current-${activePlayer}`).textContent = '0';
+        //update score
+        roundScore = 0;
+        //update activePlayer variable
+        activePlayer = (activePlayer === 0)? 1 : 0;
+
+        //pass the turn
+        ['player-0-panel', 'player-1-panel'].forEach( e => {
+            document.querySelector(`.${e}`).classList.toggle('active');
+        });
+
+        //hide the dice
+        diceDOM.style.display = 'none';
+    }
+});
