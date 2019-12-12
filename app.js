@@ -8,7 +8,8 @@ GAME RULES:
 - The first player to reach 100 points on GLOBAL score wins the game
 
 */
-var scores, roundScore, activePlayer, diceDOM, isGamePlaying;
+
+var scores, roundScore, activePlayer, diceDOM, isGamePlaying, prev, dice;
 diceDOM = document.querySelector('.dice');
 
 init();
@@ -17,17 +18,23 @@ init();
 
 document.querySelector('.btn-roll').addEventListener('click', function () {
     if (isGamePlaying) {
-        var dice;
+        diceDOM.style.display = 'block';
+        prev = dice;
+
         //1- get a random number
         dice = Math.floor(Math.random() * 6) + 1;
 
         //2- update the dice 
         diceDOM = document.querySelector('.dice');
-        diceDOM.style.display = 'block';
         diceDOM.src = `dice-${dice}.png`;
 
         //3- update the score if rolled !== 1
-        if (dice !== 1) {
+        if (prev === dice && dice === 6) {
+            scores[activePlayer] = 0;
+            document.getElementById(`score-${activePlayer}`).textContent = 0;
+            nextPlayer();
+        }
+        else if (dice !== 1) {
             //add score
             roundScore += dice;
             //update the UI
@@ -49,6 +56,7 @@ document.querySelector('.btn-hold').addEventListener('click', function () {
             document.querySelector('.dice').style.display = 'none';
             document.querySelector(`.player-${activePlayer}-panel`).classList.add('winner');
             document.querySelector(`.player-${activePlayer}-panel`).classList.remove('active');
+            isGamePlaying = false;
         } else {
             //next player
             nextPlayer();
@@ -74,14 +82,17 @@ function nextPlayer() {
 
     //hide the dice
     diceDOM.style.display = 'none';
+    prev = 0;
 }
 
 function init() {
     scores = [0, 0];
     roundScore = 0;
     activePlayer = 0;
+    dice = 0;
     diceDOM.style.display = 'none';
     isGamePlaying = true;
+    prev = 0;
 
     ['current-0', 'current-1', 'score-0', 'score-1'].forEach(e => {
         document.getElementById(e).textContent = 0;
@@ -98,3 +109,69 @@ function init() {
 
     document.querySelector('.player-0-panel').classList.add('active');
 }
+
+/*
+YOUR 3 CHALLENGES
+Change the game to follow these rules:
+
+1. A player looses his ENTIRE score when he rolls two 6 in a row. After that, it's the next player's turn. (Hint: Always save the previous dice roll in a separate variable)
+2. Add an input field to the HTML where players can set the winning score, so that they can change the predefined score of 100. (Hint: you can read that value with the .value property in JavaScript. This is a good oportunity to use google to figure this out :)
+3. Add another dice to the game, so that there are two dices now. The player looses his current score when one of them is a 1. (Hint: you will need CSS to position the second dice, so take a look at the CSS code for the first one.)
+*/
+
+function jobQuestion(job) {
+    var jobs = {
+        teacher: "what do u teach",
+        designer: "can u explain UX",
+        whatever: "what do u do"
+    }
+
+    return function (name) {
+        var question;
+
+        if (!jobs.hasOwnProperty(job)) {
+            question = jobs.whatever + `, ${name} ?`;
+            return question;
+        }
+
+        question = jobs[job] + `, ${name} ?`;
+        return question;
+    }
+}
+
+function Question(qst, answers, correct) {
+    this.qst = qst;
+    this.answers = answers;
+    this.correct = correct;
+}
+
+var arrQST = [
+    new Question('who is president of algeria ?', ['boutef', 'teboune', 'ben flis'], 1),
+    new Question('who is president of US ?', ['trump', 'hillary'], 0),
+    new Question('who is president of egypt ?', ['sissy', 'morsi'], 0)
+];
+
+var score = 0;
+
+(function gol() {
+    var rand = Math.floor(Math.random() * 3);
+    var ss = `${arrQST[rand].qst} \n`;
+
+    arrQST[rand].answers.forEach((e, i) => {
+        ss += `${i}- ${e} \n`;
+    });
+
+    cor = prompt(ss);
+
+    if(cor === 'exit') return;
+
+    cor = parseInt(cor);
+    if (arrQST[rand].correct === cor) {
+        score++;
+        console.log(`congrats, right answer! \n------- \n your score ${score}`);
+    }
+    else {
+        console.log(`Sorry, try again!\n------- \n your score ${score}`);
+    }
+    gol();
+})();
